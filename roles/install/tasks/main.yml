@@ -1,0 +1,51 @@
+---
+
+- name: Ensure Data folder exists
+  file:
+    path: "/{{ prop_basename }}/redis"
+    state: directory
+    owner: root
+    group: root
+    mode: 0777
+  vars:
+    ansible_connection: ssh
+    ansible_host: "{{ prop_ipaddress }}"
+  become: true
+
+- name: Load docker image
+  shell: |
+    docker image load --input /mnt/sources-dev/docker/redis/{{ prop_container_redis_file }}
+  args:
+    executable: /bin/bash
+  vars:
+    ansible_connection: ssh
+    ansible_host: "{{ prop_ipaddress }}"
+  become: true
+
+- name: create container
+  shell: |
+    docker container create \
+      --name redis \
+      --restart=always \
+      --pull=never \
+      -p 6379:6379 \
+      -p 8001:8001 \
+      -e REDIT_ARGS="--requirepass {{ prop_admin_password }}" \
+      -v /{{ prop_basename }}/redis:/data \
+      {{ prop_container_redis_tag }}
+  args:
+    executable: /bin/bash
+  vars:
+    ansible_connection: ssh
+    ansible_host: "{{ prop_ipaddress }}"
+  become: true
+
+- name: run container
+  shell: |
+    docker container start redis
+  args:
+    executable: /bin/bash
+  vars:
+    ansible_connection: ssh
+    ansible_host: "{{ prop_ipaddress }}"
+  become: true
