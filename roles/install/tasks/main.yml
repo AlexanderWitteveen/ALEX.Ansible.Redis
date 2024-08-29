@@ -30,7 +30,7 @@
       --pull=never \
       -p 6379:6379 \
       -p 8001:8001 \
-      -e REDIT_ARGS="--requirepass {{ prop_admin_password }}" \
+      -e REDIS_ARGS="--requirepass {{ prop_admin_password }}" \
       -v /{{ prop_basename }}/redis:/data \
       {{ prop_container_redis_tag }}
   args:
